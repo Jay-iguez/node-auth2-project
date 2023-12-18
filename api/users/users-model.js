@@ -1,4 +1,19 @@
 const db = require('../../data/db-config.js');
+const jwt = require('jsonwebtoken')
+
+const create_token = (user, secret) => {
+  const payload = {
+    subject: user.user_id,
+    username: user.username,
+    role_name: user.role_name
+  }
+
+  const options = {
+    expiresIn: '1d'
+  }
+
+  return jwt.sign(payload, secret, options)
+}
 
 async function find() {
   const users = await db('users as us')
@@ -54,7 +69,7 @@ async function findById(user_id) {
   const [user_by_id] = await db('users as us')
     .select('user_id', 'username', 'role_name')
     .join('roles as r', 'r.role_id', '=', 'us.role_id')
-    .where('r.role_id', user_id)
+    .where('us.user_id', user_id)
 
   return user_by_id
 
@@ -110,4 +125,5 @@ module.exports = {
   find,
   findBy,
   findById,
+  create_token
 };
